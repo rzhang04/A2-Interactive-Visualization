@@ -2,8 +2,9 @@ const margin = {top: 80, right: 60, bottom: 60, left: 100};
 const width = 800 - margin.left - margin.right;
 const height = 600 - margin.top - margin.bottom;
 
-
 let allData = []
+let colorVar = "snowDepth";
+const options = ["minTemp", "maxTemp", "snowDepth", "precipitation"]
 
 const stateAbbreviations = {
     AL: "Alabama",
@@ -65,22 +66,38 @@ const stateAbbreviations = {
 };
 
 const colorScale = (x) => {
-
-    // Ensure we are accessing the temperature value properly
-    let temp = x?.properties?.state_info?.minTemp; //this is for minTemp
-
-    if (temp === undefined || temp === 0) {
+    let d3ColorScale;
+    let value = x?.properties?.state_info?.[colorVar];
+    if (value === undefined || value === null) {
         return 'gray';  // coloring states gray for missing data
     }
 
-    let d3ColorScale = d3.scaleLinear().domain([-60, -40, -20, 0, 20, 40, 60, 80, 100]) //we should probably add a key
-    .range(['#eed4e8', '#bd5ba6', '#6b1280', '#04008a', '#3e8cf5', '#abfc8a', '#ee8431', '#76150c','#4d0c05']);
+    let domains = {
+        minTemp: [70, 20], // for a flipped color scale
+        maxTemp: [100, 20],
+        precipitation: [0, 0.2],
+        snowDepth: [20, 0]
+    }
+
+    if (colorVar == "minTemp" || colorVar == "maxTemp") {
+        d3ColorScale = d3.scaleSequential()
+            .domain(domains[colorVar])
+            .interpolator(d3.interpolateRdYlGn);
+    } else if (colorVar == "precipitation") {
+        d3ColorScale = d3.scaleSequential()
+            .domain(domains[colorVar])
+            .interpolator(d3.interpolateBlues);
+    } else if (colorVar == "snowDepth") {
+        d3ColorScale = d3.scaleSequential()
+            .domain(domains[colorVar])
+            .interpolator(d3.interpolateBlues);
+    }
 
     // Logging temperature for debugging
-    console.log("State:", x.properties.name, "Temperature:", temp);
+    console.log("State:", x.properties.name, conv(colorVar), value);
     
-    // Return the color based on the temp value
-    return d3ColorScale(temp);
+    // Return the color based on the value
+    return d3ColorScale(value);
 }
 
 function createVis(us, weatherData) {
@@ -101,8 +118,7 @@ function createVis(us, weatherData) {
 
     // Loop through each state in the topoJSON data
     states_topo.features.forEach(s => {
-        let matchingWeather = weatherData.find(w => {// Find the matching weather data for the current state
-            
+        let matchingWeather = weatherData.find(w => { //  matching weather data for the current state
             let fullStateName = stateAbbreviations[w.state.toUpperCase()];// Convert state abbreviation to full name
             return fullStateName && fullStateName.toLowerCase() === s.properties.name.toLowerCase();
         });
@@ -123,16 +139,16 @@ function createVis(us, weatherData) {
         .attr("d", path)
         .attr('fill', d => colorScale(d));
         
-
     states.append("title")
         .text(d => d.properties.name);
     
     g.append("path")
-    .attr("fill", "none")
-    .attr("stroke", "white")
-    .attr("stroke-linejoin", "round")
-    .attr("d", path(topojson.mesh(us, us.objects.states, (a, b) => a !== b)));
+        .attr("fill", "none")
+        .attr("stroke", "white")
+        .attr("stroke-linejoin", "round")
+        .attr("d", path(topojson.mesh(us, us.objects.states, (a, b) => a !== b)));  
     
+    window.mapStates = states;
 }    
 
 async function init() {
@@ -156,38 +172,40 @@ async function init() {
             station: d.station
         }));
 
-    // Group weather data by state
-    const groupedByState = weatherData.reduce((acc, curr) => {
-        // Use the state abbreviation as the key
-        const state = curr.state.toUpperCase();
-        if (!acc[state]) {
-            acc[state] = [];
-        }
-        acc[state].push(curr);
-        return acc;
-    }, {});
+        // Group weather data by state
+        const groupedByState = weatherData.reduce((acc, curr) => {
+            // Use the state abbreviation as the key
+            const state = curr.state.toUpperCase();
+            if (!acc[state]) {
+                acc[state] = [];
+            }
+            acc[state].push(curr);
+            return acc;
+        }, {});
 
-    // Calculate the average values for each state's weather data
-    const averagedStateData = Object.keys(groupedByState).map(stateKey => {
-        const stateData = groupedByState[stateKey];
-        const avgData = {
-            state: stateKey,
-            minTemp: d3.mean(stateData, d => d.minTemp) // Only averaging minTemp
-        };
-        return avgData;
-    });
+        // Calculate the average values for each state's weather data
+        const averagedStateData = Object.keys(groupedByState).map(stateKey => {
+            const stateData = groupedByState[stateKey];
+            const avgData = {
+                state: stateKey,
+                minTemp: d3.mean(stateData, d => d.minTemp),
+                maxTemp: d3.mean(stateData, d => d.maxTemp),
+                precipitation: d3.mean(stateData, d => d.precipitation),
+                snowDepth: d3.mean(stateData, d => d.snowDepth)
+            };
+            return avgData;
+        });
 
-    console.log("Averaged Weather Data:", averagedStateData);
-    allData = averagedStateData;
+        console.log("Averaged Weather Data:", averagedStateData);
+        allData = averagedStateData;
 
-    // Load map data
-    let us = await d3.json("./data/states-albers-10m.json");
-    console.log("Map Data:", us);
-    
-    setUpSelector()
-
-        // Call visualization function
+        // Load map data
+        let us = await d3.json("./data/states-albers-10m.json");
+        console.log("Map Data:", us);
+        
+        setUpSelector();
         createVis(us, averagedStateData);
+
     } catch (error) {
         console.error("Error loading data:", error);
     }
@@ -196,5 +214,40 @@ async function init() {
 window.addEventListener('load', init);
 
 function setUpSelector() {
-    //code some kind of dropdown to feature 3 diff filtered map datas
+    // dropdown to filter map data
+    d3.selectAll('#colorVariable')
+        .selectAll("option")
+        .data(options)
+        .enter()
+        .append('option')
+        .text(d => conv(d))
+        .attr("value", d => d);
+
+    // react on change
+    d3.selectAll('#colorVariable')
+        .on("change", function() {
+            colorVar = d3.select(this).property("value");
+            updateVis();
+        });
+    d3.select('#colorVariable').property('value', colorVar);
+}
+
+function updateVis() {
+    window.mapStates
+        .transition()
+        .duration(500)
+        .attr("fill", d => colorScale(d))
+}
+
+// convert variable names to natural names
+function conv(val) {
+    if (val == "minTemp") {
+        return "Average Minimum Temperature";
+    } else if (val == "maxTemp") {
+        return "Average Maximum Temperature";
+    } else if (val == "precipitation") {
+        return "Precipitation"
+    } else if (val == "snowDepth") {
+        return "Snow Depth"
+    }
 }
