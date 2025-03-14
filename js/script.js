@@ -64,16 +64,16 @@ const stateAbbreviations = {
     WY: "Wyoming"
 };
 
-const colorScale = (x) => { //this is for avgTemp for example, was just trying to see and make it work
+const colorScale = (x) => {
 
     // Ensure we are accessing the temperature value properly
-    let temp = x?.properties?.state_info?.avgTemp;
+    let temp = x?.properties?.state_info?.maxTemp; //this is for maxTemp
 
-    if (temp === 0) {
+    if (temp === undefined || temp === 0) {
         return 'gray';  // coloring states gray for missing data
     }
 
-    let d3ColorScale = d3.scaleLinear().domain([-60, -40, -20, 0, 20, 40, 60, 80, 100])
+    let d3ColorScale = d3.scaleLinear().domain([-60, -40, -20, 0, 20, 40, 60, 80, 100]) //we should probably add a key
     .range(['#eed4e8', '#bd5ba6', '#6b1280', '#04008a', '#3e8cf5', '#abfc8a', '#ee8431', '#76150c','#4d0c05']);
 
     // Logging temperature for debugging
@@ -114,10 +114,7 @@ function createVis(us, weatherData) {
         }
     });
 
-    console.log("Merged Data:", states_topo.features);
-
     const states = g.append("g")
-        //.attr("fill", "#444")
         .attr("cursor", "pointer")
         .selectAll("path")
         .data(topojson.feature(us, us.objects.states).features)
@@ -158,13 +155,14 @@ async function init() {
             state: d.state,
             station: d.station
         }));
-
         console.log("Weather Data:", weatherData);
         allData = weatherData;
 
         // Load map data
         let us = await d3.json("./data/states-albers-10m.json");
         console.log("Map Data:", us);
+        
+        setUpSelector()
 
         // Call visualization function
         createVis(us, weatherData);
@@ -173,3 +171,7 @@ async function init() {
     }
 }
 window.addEventListener('load', init);
+
+function setUpSelector() {
+    //code some kind of dropdown to feature 3 diff filtered map datas
+}
