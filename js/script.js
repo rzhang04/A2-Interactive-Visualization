@@ -67,7 +67,7 @@ const stateAbbreviations = {
 const colorScale = (x) => {
 
     // Ensure we are accessing the temperature value properly
-    let temp = x?.properties?.state_info?.maxTemp; //this is for maxTemp
+    let temp = x?.properties?.state_info?.minTemp; //this is for minTemp
 
     if (temp === undefined || temp === 0) {
         return 'gray';  // coloring states gray for missing data
@@ -155,21 +155,44 @@ async function init() {
             state: d.state,
             station: d.station
         }));
-        console.log("Weather Data:", weatherData);
-        allData = weatherData;
 
-        // Load map data
-        let us = await d3.json("./data/states-albers-10m.json");
-        console.log("Map Data:", us);
-        
-        setUpSelector()
+    // Group weather data by state
+    const groupedByState = weatherData.reduce((acc, curr) => {
+        // Use the state abbreviation as the key
+        const state = curr.state.toUpperCase();
+        if (!acc[state]) {
+            acc[state] = [];
+        }
+        acc[state].push(curr);
+        return acc;
+    }, {});
+
+    // Calculate the average values for each state's weather data
+    const averagedStateData = Object.keys(groupedByState).map(stateKey => {
+        const stateData = groupedByState[stateKey];
+        const avgData = {
+            state: stateKey,
+            minTemp: d3.mean(stateData, d => d.minTemp) // Only averaging minTemp
+        };
+        return avgData;
+    });
+
+    console.log("Averaged Weather Data:", averagedStateData);
+    allData = averagedStateData;
+
+    // Load map data
+    let us = await d3.json("./data/states-albers-10m.json");
+    console.log("Map Data:", us);
+    
+    setUpSelector()
 
         // Call visualization function
-        createVis(us, weatherData);
+        createVis(us, averagedStateData);
     } catch (error) {
         console.error("Error loading data:", error);
     }
 }
+
 window.addEventListener('load', init);
 
 function setUpSelector() {
