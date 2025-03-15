@@ -10,13 +10,20 @@
     <div class="container"> <!-- Centers content and sets max width -->
         <h1>A2: Interactive Visualization</h1>
         <div id="controls">
-            <!--placeholder for three dropdown buttons -->
             Color Variable: <select id="colorVariable" class="variable"></select>
         </div>
         <div id="vis"></div> <!--  Will hold our visualization (SVG) -->
     </div>
     <div id="legend"></div>
     <div id="tooltip" style="display:none"></div> 
+    <select id="colorVarSelect">
+        <option value="maxTemp">Max Temperature</option>
+        <option value="minTemp">Min Temperature</option>
+        <option value="precipitation">Precipitation</option>
+        <!-- Add more options as needed -->
+    </select>
+
+    
 
     <!-- Load D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>

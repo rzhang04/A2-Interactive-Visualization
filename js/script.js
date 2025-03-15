@@ -137,7 +137,16 @@ function createVis(us, weatherData) {
         .attr('fill', d => colorScale(d));
         
     states.append("title")
-        .text(d => d.properties.name);
+    .text(d => {
+        let info = d.properties.state_info;
+        if (!info) return `${d.properties.name} (No Data)`;
+
+        return `${d.properties.name}
+Min Temp: ${info.minTemp?.toFixed(1) || "N/A"}°F
+Max Temp: ${info.maxTemp?.toFixed(1) || "N/A"}°F
+Precipitation: ${info.precipitation?.toFixed(2) || "N/A"} in
+Snow Depth: ${info.snowDepth?.toFixed(1) || "N/A"} in`;
+    });
     
     g.append("path")
         .attr("fill", "none")
