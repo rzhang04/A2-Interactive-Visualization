@@ -133,6 +133,25 @@ function createVis(us, weatherData) {
         .data(topojson.feature(us, us.objects.states).features)
         .join("path")
         // .on("click", clicked)
+        .on('mouseover', function (event, d){
+            let state = d.properties.name;
+            let abbrev = Object.entries(stateAbbreviations).find(([abbr, name]) => name === state)[0];
+            d3.select('#tooltip')
+                .style("display", "block")
+                .html(
+                    `<strong>${state}</strong><br/>
+                    Min Temp: ${allData.find(e => e.state === abbrev).minTemp.toFixed(2)}<br>
+                    Max Temp: ${allData.find(e => e.state === abbrev).maxTemp.toFixed(2)}<br>
+                    Precipitation: ${allData.find(e => e.state === abbrev).precipitation.toFixed(2)}<br>
+                    Snow Depth: ${allData.find(e => e.state === abbrev).snowDepth.toFixed(2)}`
+                )
+                .style("left", (event.pageX + 20) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function (event, d) {
+            d3.select('#tooltip')
+                .style("display", "none")
+        })
         .attr("d", path)
         .attr('fill', d => colorScale(d));
         
@@ -142,10 +161,10 @@ function createVis(us, weatherData) {
         if (!info) return `${d.properties.name} (No Data)`;
 
         return `${d.properties.name}
-Min Temp: ${info.minTemp?.toFixed(1) || "N/A"}°F
-Max Temp: ${info.maxTemp?.toFixed(1) || "N/A"}°F
-Precipitation: ${info.precipitation?.toFixed(2) || "N/A"} in
-Snow Depth: ${info.snowDepth?.toFixed(1) || "N/A"} in`;
+        Min Temp: ${info.minTemp?.toFixed(1) || "N/A"}°F
+        Max Temp: ${info.maxTemp?.toFixed(1) || "N/A"}°F
+        Precipitation: ${info.precipitation?.toFixed(2) || "N/A"} in
+        Snow Depth: ${info.snowDepth?.toFixed(1) || "N/A"} in`;
     });
     
     g.append("path")
@@ -155,6 +174,13 @@ Snow Depth: ${info.snowDepth?.toFixed(1) || "N/A"} in`;
         .attr("d", path(topojson.mesh(us, us.objects.states, (a, b) => a !== b)));  
     
     window.mapStates = states;
+
+    g.append("text")
+    .attr("x", width / 2)
+    .attr("y", margin.top - 59)
+    .attr("fill", "black")
+    .attr("text-anchor", "middle")
+    .text("U.S. Map of Average Minimum Temperature, Maximum Temperature, Precipitation, and Snow Depth per State");
 }    
 
 async function init() {
@@ -241,6 +267,25 @@ function setUpSelector() {
 
 function updateVis() {
     window.mapStates
+        .on('mouseover', function (event, d){
+            let state = d.properties.name;
+            let abbrev = Object.entries(stateAbbreviations).find(([abbr, name]) => name === state)[0];
+            d3.select('#tooltip')
+                .style("display", "block")
+                .html(
+                    `<strong>${state}</strong><br/>
+                    Min Temp: ${allData.find(e => e.state === abbrev).minTemp.toFixed(2)}<br>
+                    Max Temp: ${allData.find(e => e.state === abbrev).maxTemp.toFixed(2)}<br>
+                    Precipitation: ${allData.find(e => e.state === abbrev).precipitation.toFixed(2)}<br>
+                    Snow Depth: ${allData.find(e => e.state === abbrev).snowDepth.toFixed(2)}`
+                )
+                .style("left", (event.pageX + 20) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function (event, d) {
+            d3.select('#tooltip')
+                .style("display", "none")
+        })
         .transition()
         .duration(500)
         .attr("fill", d => colorScale(d))
@@ -252,8 +297,8 @@ function updateLegend() {
     let titles = {
         minTemp: "Average Minimum Temperature (°F)",
         maxTemp: "Average Maximum Temperature (°F)",
-        precipitation: "Precipitation (in)",
-        snowDepth: "Snow Depth (in)"
+        precipitation: "Average Precipitation (in)",
+        snowDepth: "Average Snow Depth (in)"
     };
 
     let legend;
