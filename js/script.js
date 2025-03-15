@@ -262,10 +262,10 @@ function updateVis() {
                 .style("display", "block")
                 .html(
                     `<strong>${state}</strong><br/>
-                    Min Temp: ${allData.find(e => e.state === abbrev).minTemp.toFixed(2)}<br>
-                    Max Temp: ${allData.find(e => e.state === abbrev).maxTemp.toFixed(2)}<br>
-                    Precipitation: ${allData.find(e => e.state === abbrev).precipitation.toFixed(2)}<br>
-                    Snow Depth: ${allData.find(e => e.state === abbrev).snowDepth.toFixed(2)}`
+                    Min Temp: ${allData.find(e => e.state === abbrev).minTemp.toFixed(2)}°F<br>
+                    Max Temp: ${allData.find(e => e.state === abbrev).maxTemp.toFixed(2)}°F<br>
+                    Precipitation: ${allData.find(e => e.state === abbrev).precipitation.toFixed(2)}in<br>
+                    Snow Depth: ${allData.find(e => e.state === abbrev).snowDepth.toFixed(2)}in`
                 )
                 .style("left", (event.pageX + 20) + "px")
                 .style("top", (event.pageY - 28) + "px");
