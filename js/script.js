@@ -140,10 +140,10 @@ function createVis(us, weatherData) {
                 .style("display", "block")
                 .html(
                     `<strong>${state}</strong><br/>
-                    Min Temp: ${allData.find(e => e.state === abbrev).minTemp.toFixed(2)}<br>
-                    Max Temp: ${allData.find(e => e.state === abbrev).maxTemp.toFixed(2)}<br>
-                    Precipitation: ${allData.find(e => e.state === abbrev).precipitation.toFixed(2)}<br>
-                    Snow Depth: ${allData.find(e => e.state === abbrev).snowDepth.toFixed(2)}`
+                    Min Temp: ${allData.find(e => e.state === abbrev).minTemp.toFixed(2)}°F<br>
+                    Max Temp: ${allData.find(e => e.state === abbrev).maxTemp.toFixed(2)}°F<br>
+                    Precipitation: ${allData.find(e => e.state === abbrev).precipitation.toFixed(2)}in<br>
+                    Snow Depth: ${allData.find(e => e.state === abbrev).snowDepth.toFixed(2)}in`
                 )
                 .style("left", (event.pageX + 20) + "px")
                 .style("top", (event.pageY - 28) + "px");
@@ -154,18 +154,6 @@ function createVis(us, weatherData) {
         })
         .attr("d", path)
         .attr('fill', d => colorScale(d));
-        
-    states.append("title")
-    .text(d => {
-        let info = d.properties.state_info;
-        if (!info) return `${d.properties.name} (No Data)`;
-
-        return `${d.properties.name}
-        Min Temp: ${info.minTemp?.toFixed(1) || "N/A"}°F
-        Max Temp: ${info.maxTemp?.toFixed(1) || "N/A"}°F
-        Precipitation: ${info.precipitation?.toFixed(2) || "N/A"} in
-        Snow Depth: ${info.snowDepth?.toFixed(1) || "N/A"} in`;
-    });
     
     g.append("path")
         .attr("fill", "none")
@@ -180,7 +168,7 @@ function createVis(us, weatherData) {
     .attr("y", margin.top - 59)
     .attr("fill", "black")
     .attr("text-anchor", "middle")
-    .text("U.S. Map of Average Minimum Temperature, Maximum Temperature, Precipitation, and Snow Depth per State");
+    .text("U.S. Map of Average Minimum Temperature, Maximum Temperature, Precipitation, and Snow Depth per State in 2017");
 }    
 
 async function init() {
