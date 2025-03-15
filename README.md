@@ -1,6 +1,6 @@
 Nicole Zhang, Riva Zhang
 Group 20
-A2: Interactive Visualization | For better viewing, visit this link: https://docs.google.com/document/d/1EC1vczbulcLYfdyGDvecBEsgh7RwwCCyo3ZHy0FvjeA/edit?usp=sharing
+A2: Interactive Visualization | For better viewing, visit this link: https://docs.google.com/document/d/1EC1vczbulcLYfdyGDvecBEsgh7RwwCCyo3ZHy0FvjeA/edit?usp=sharing | Demo link: https://youtu.be/wzTe-f3L-R8
 1. Introduction
 	The dataset we chose to visualize was the daily weather measurements in the United States in 2017. Visualization of daily weather may allow patterns to emerge that can be used for public safety or awareness, agriculture and food production, energy and infrastructure management, and more. We chose to focus on average snow depth, precipitation, maximum temperature, and minimum temperature of each state/territory because it could help identify areas at risk of disasters like storms, floods, or avalanches and areas with hazardous travel conditions for planes and vehicles. Heavy precipitation and snow depth could also impact energy consumption and demand, which is an important consideration for building infrastructure and energy generation. Max and min temperatures provide valuable insights into temperature extremes, which can indicate potential heatwaves, cold snaps, and other climate anomalies. This data is necessary because it can help optimize agricultural practices, as well as identify potential risks to public safety.
 
